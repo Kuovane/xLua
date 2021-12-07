@@ -38,7 +38,7 @@ if (NOT LUA_VERSION)
 endif()
 
 set(LUA_SRC_PATH lua-${LUA_VERSION}/src)
-set(LUAJIT_SRC_PATH luajit-2.1.0b3/src)
+set(LUAJIT_SRC_PATH luajit-2.1.16/src)
 
 if (USING_LUAJIT)
 	
