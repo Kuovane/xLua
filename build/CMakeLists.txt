@@ -21,7 +21,7 @@ if ( IOS )
 endif ()
 
 option ( UINT_ESPECIALLY "using custom ulong" OFF )
-option ( USING_LUAJIT "using luajit" OFF )
+option ( USING_LUAJIT "using luajit" ON )
 option ( GC64 "using gc64" OFF )
 option ( LUAC_COMPATIBLE_FORMAT "compatible format" OFF )
 
@@ -39,6 +39,7 @@ endif()
 
 set(LUA_SRC_PATH lua-${LUA_VERSION}/src)
 set(LUAJIT_SRC_PATH luajit-2.1.16/src)
+set(THIRDPART_INC cjson)
 
 if (USING_LUAJIT)
 	
@@ -121,6 +122,13 @@ if (NOT USING_LUAJIT)
     list (APPEND XLUA_CORE memory_leak_checker.c)
 endif ( )
 
+set ( C_JSON
+    cjson/fpconv.c
+    cjson/lua_cjson.c
+    cjson/strbuf.c
+)
+
+
 macro(source_group_by_dir proj_dir source_files)
     if(MSVC OR APPLE)
         get_filename_component(sgbd_cur_dir ${proj_dir} ABSOLUTE)
@@ -142,6 +150,7 @@ source_group_by_dir(${CMAKE_CURRENT_SOURCE_DIR} LUA_SOCKET)
 source_group_by_dir(${CMAKE_CURRENT_SOURCE_DIR} LUA_CORE)
 source_group_by_dir(${CMAKE_CURRENT_SOURCE_DIR} LUA_LIB)
 source_group_by_dir(${CMAKE_CURRENT_SOURCE_DIR} XLUA_CORE)
+source_group_by_dir(${CMAKE_CURRENT_SOURCE_DIR} C_JSON)
 
 if (APPLE)
     if (IOS)
@@ -151,6 +160,7 @@ if (APPLE)
            ${LUA_LIB}
            ${LUA_SOCKET}
            ${XLUA_CORE}
+           ${C_JSON}
            ${THIRDPART_SRC}
         )
 		set_xcode_property (xlua IPHONEOS_DEPLOYMENT_TARGET "7.0" "all")
@@ -162,6 +172,7 @@ if (APPLE)
             ${LUA_LIB}
             ${LUA_SOCKET}
             ${XLUA_CORE}
+            ${C_JSON}
             ${THIRDPART_SRC}
         )
         set_target_properties ( xlua PROPERTIES BUNDLE TRUE )
@@ -173,6 +184,7 @@ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Switch")
         ${LUA_CORE}
         ${LUA_LIB}
         ${XLUA_CORE}
+        ${C_JSON}
         ${THIRDPART_SRC}
     )
     target_compile_options(xlua PRIVATE -m64 -mcpu=cortex-a57+fp+simd+crypto+crc -fno-common -fno-short-enums -ffunction-sections -fdata-sections -fPIC -fms-extensions)
@@ -181,6 +193,7 @@ else ( )
         ${LUA_CORE}
         ${LUA_LIB}
         ${LUA_SOCKET}
+        ${C_JSON}
         ${XLUA_CORE}
         ${THIRDPART_SRC}
     )
@@ -204,6 +217,14 @@ set_property(
 	PROPERTY COMPILE_DEFINITIONS
 	LUA_COMPAT_APIINTCASTS LUA_LIB _CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS
 )
+
+set_property(
+    SOURCE ${C_JSON}
+    APPEND
+    PROPERTY COMPILE_DEFINITIONS
+    LUA_LIB
+)
+
 
 if(UINT_ESPECIALLY)
     ADD_DEFINITIONS(-DUINT_ESPECIALLY)
